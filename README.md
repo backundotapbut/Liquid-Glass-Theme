@@ -1,4 +1,4 @@
-# LiquidGlassTheme [W.I.P]
+# LiquidGlassTheme
 
 Тема в стиле «жидкого стекла» для PulseSync. Это объединение и доработка двух
 аддонов — **Minimalistic Wave Tab** (минималистичная страница «Моя волна») и
