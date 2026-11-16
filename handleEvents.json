@@ -1,0 +1,437 @@
+{
+  "sections": [
+    {
+      "title": "Стекло и размытие",
+      "items": [
+        {
+          "id": "glassEnabled",
+          "name": "Стеклянные эффекты",
+          "description": "Главный выключатель темы. Если выключить, приложение выглядит как в стандартном оформлении.",
+          "type": "button",
+          "bool": true,
+          "defaultParameter": true
+        },
+        {
+          "id": "liquidGlass",
+          "name": "Жидкое стекло",
+          "description": "Добавляет к размытию эффект искажения. На полноэкранный плеер, карточку трека и просмотр обложки не действует — там фон не должен выгибаться.",
+          "type": "button",
+          "bool": true,
+          "defaultParameter": true
+        },
+        {
+          "id": "glassSaturation",
+          "name": "Насыщенность стекла",
+          "description": "Насколько стекло усиливает цвет фона (100% — без изменений).",
+          "type": "slider",
+          "min": 100,
+          "max": 300,
+          "step": 5,
+          "value": 180,
+          "defaultParameter": 180
+        },
+        {
+          "id": "blurBase",
+          "name": "Размытие плеера и мелких элементов",
+          "description": "Сила размытия плеера, нижней полосы и небольших элементов.",
+          "type": "slider",
+          "min": 0,
+          "max": 30,
+          "step": 1,
+          "value": 4,
+          "defaultParameter": 4
+        },
+        {
+          "id": "blurPanels",
+          "name": "Размытие панелей и окон",
+          "description": "Сила размытия всплывающих панелей, диалогов, полноэкранного плеера и кнопок.",
+          "type": "slider",
+          "min": 0,
+          "max": 30,
+          "step": 1,
+          "value": 8,
+          "defaultParameter": 8
+        }
+      ]
+    },
+    {
+      "title": "Всплывающие окна",
+      "items": [
+        {
+          "id": "popupGlassEnabled",
+          "name": "Стекло окон и диалогов",
+          "description": "Прозрачная подложка с размытием для диалогов, карточки трека, полноэкранной обложки и других модалок.",
+          "type": "button",
+          "bool": true,
+          "defaultParameter": true
+        },
+        {
+          "id": "fullscreenGlassEnabled",
+          "name": "Стекло полноэкранного плеера",
+          "description": "Прозрачный фон и размытие полноэкранного плеера.",
+          "type": "button",
+          "bool": true,
+          "defaultParameter": true
+        },
+        {
+          "id": "tooltipGlass",
+          "name": "Стекло подсказки таймкода",
+          "description": "Оформляет всплывающую подсказку таймкода в плеере «Моя волна».",
+          "type": "button",
+          "bool": true,
+          "defaultParameter": true
+        },
+        {
+          "id": "blurTooltip",
+          "name": "Размытие подсказки таймкода",
+          "description": "Сила размытия подсказки. Работает при включённом стекле подсказки.",
+          "type": "slider",
+          "min": 0,
+          "max": 30,
+          "step": 1,
+          "value": 4,
+          "defaultParameter": 4
+        },
+        {
+          "id": "tooltipBgOpacity",
+          "name": "Плотность фона подсказки",
+          "description": "Насколько плотная подложка у подсказки таймкода. 0% — полностью прозрачная, 100% — плотный фон.",
+          "type": "slider",
+          "min": 0,
+          "max": 100,
+          "step": 5,
+          "value": 5,
+          "defaultParameter": 5
+        }
+      ]
+    },
+    {
+      "title": "Плотность подложек",
+      "items": [
+        {
+          "id": "playerBgOpacity",
+          "name": "Фон плеера",
+          "description": "Плотность подложки обычного и полноэкранного плеера.",
+          "type": "slider",
+          "min": 0,
+          "max": 100,
+          "step": 5,
+          "value": 40,
+          "defaultParameter": 40
+        },
+        {
+          "id": "popoverBgOpacity",
+          "name": "Фон панелей",
+          "description": "Плотность подложки всплывающих окон и панелей.",
+          "type": "slider",
+          "min": 0,
+          "max": 100,
+          "step": 5,
+          "value": 35,
+          "defaultParameter": 35
+        },
+        {
+          "id": "buttonBgOpacity",
+          "name": "Фон кнопок",
+          "description": "Плотность подложки круглых кнопок плеера и полноэкранного режима.",
+          "type": "slider",
+          "min": 0,
+          "max": 100,
+          "step": 5,
+          "value": 35,
+          "defaultParameter": 35
+        }
+      ]
+    },
+    {
+      "title": "Анимации",
+      "items": [
+        {
+          "id": "fullscreenAnimations",
+          "name": "Открытие полноэкранного плеера",
+          "description": "Плавное открытие и закрытие полноэкранного режима.",
+          "type": "button",
+          "bool": true,
+          "defaultParameter": true
+        },
+        {
+          "id": "coverAnimations",
+          "name": "Смена обложки",
+          "description": "Сдвиг обложки при переключении трека в полноэкранном режиме.",
+          "type": "button",
+          "bool": true,
+          "defaultParameter": true
+        },
+        {
+          "id": "fullscreenSmoothBg",
+          "name": "Плавный фон плеера",
+          "description": "Мягкое появление фона при открытии полноэкранного плеера.",
+          "type": "button",
+          "bool": true,
+          "defaultParameter": true
+        },
+        {
+          "id": "fullscreenAnimationDuration",
+          "name": "Длительность анимаций плеера",
+          "description": "Скорость открытия и закрытия полноэкранного режима.",
+          "type": "slider",
+          "min": 100,
+          "max": 900,
+          "step": 50,
+          "value": 300,
+          "defaultParameter": 300
+        },
+        {
+          "id": "animationEnabled",
+          "name": "Анимация волны",
+          "description": "Фоновая анимация волны на странице «Моя волна».",
+          "type": "button",
+          "bool": true,
+          "defaultParameter": true
+        },
+        {
+          "id": "animationScale",
+          "name": "Размер волны",
+          "description": "Масштаб волны относительно окна (1.0 = 100%, 1.5 = 150%).",
+          "type": "slider",
+          "min": 0.5,
+          "max": 2,
+          "step": 0.1,
+          "value": 1.5,
+          "defaultParameter": 1.5
+        },
+        {
+          "id": "animationLeftOffset",
+          "name": "Сдвиг волны по горизонтали",
+          "description": "Смещение волны влево или вправо.",
+          "type": "slider",
+          "min": -250,
+          "max": 250,
+          "step": 10,
+          "value": 0,
+          "defaultParameter": 0
+        },
+        {
+          "id": "animationTopOffset",
+          "name": "Сдвиг волны по вертикали",
+          "description": "Смещение волны вверх или вниз.",
+          "type": "slider",
+          "min": -250,
+          "max": 250,
+          "step": 10,
+          "value": 30,
+          "defaultParameter": 30
+        }
+      ]
+    },
+    {
+      "title": "Моя волна",
+      "items": [
+        {
+          "id": "waveLayoutEnabled",
+          "name": "Минималистичная раскладка",
+          "description": "Убирает колесо рекомендаций и лишние обложки, оставляя чистый плеер и анимацию. Колесо открывается кнопкой «Настроить».",
+          "type": "button",
+          "bool": true,
+          "defaultParameter": true
+        },
+        {
+          "id": "playerWidth",
+          "name": "Ширина плеера",
+          "description": "Ширина панели плеера в процентах от доступного места.",
+          "type": "slider",
+          "min": 20,
+          "max": 100,
+          "step": 1,
+          "value": 100,
+          "defaultParameter": 100
+        },
+        {
+          "id": "coverOffsetX",
+          "name": "Сдвиг кнопок плеера",
+          "description": "Смещение кнопок паузы и обложки влево или вправо.",
+          "type": "slider",
+          "min": -200,
+          "max": 200,
+          "step": 10,
+          "value": 0,
+          "defaultParameter": 0
+        },
+        {
+          "id": "hideVibeBanner",
+          "name": "Скрыть баннер обновления",
+          "description": "Убирает плашку «Моя волна обновилась» в углу страницы.",
+          "type": "button",
+          "bool": true,
+          "defaultParameter": true
+        },
+        {
+          "id": "hideVibeArtist",
+          "name": "Скрыть артиста",
+          "description": "Скрывает имя артиста и аватарку над плеером.",
+          "type": "button",
+          "bool": true,
+          "defaultParameter": true
+        }
+      ]
+    },
+    {
+      "title": "Стекло плеера «Моя волна»",
+      "items": [
+        {
+          "id": "vibeGlassEnabled",
+          "name": "Стекло плеера",
+          "description": "Общий выключатель стеклянных подложек плеера: шкала прогресса, кнопки и подсказка 18+.",
+          "type": "button",
+          "bool": true,
+          "defaultParameter": true
+        },
+        {
+          "id": "progressGlassEnabled",
+          "name": "Стекло шкалы прогресса",
+          "description": "Полупрозрачная капсула с размытием вокруг шкалы прогресса.",
+          "type": "button",
+          "bool": true,
+          "defaultParameter": true
+        },
+        {
+          "id": "progressBgOpacity",
+          "name": "Плотность шкалы прогресса",
+          "description": "Насколько плотная капсула шкалы прогресса.",
+          "type": "slider",
+          "min": 0,
+          "max": 100,
+          "step": 5,
+          "value": 35,
+          "defaultParameter": 35
+        },
+        {
+          "id": "controlsGlassEnabled",
+          "name": "Стекло кнопок плеера",
+          "description": "Стеклянные подложки для кнопок: лайк, громкость, переключение треков, play/pause.",
+          "type": "button",
+          "bool": true,
+          "defaultParameter": true
+        },
+        {
+          "id": "controlsBgOpacity",
+          "name": "Плотность кнопок плеера",
+          "description": "Насколько плотные подложки у кнопок управления.",
+          "type": "slider",
+          "min": 0,
+          "max": 100,
+          "step": 5,
+          "value": 35,
+          "defaultParameter": 35
+        },
+        {
+          "id": "explicitMarkGlass",
+          "name": "Стекло подсказки 18+",
+          "description": "Оформляет плашку «Возрастное ограничение 18+» как стекло. Сам значок не меняется.",
+          "type": "button",
+          "bool": true,
+          "defaultParameter": true
+        },
+        {
+          "id": "explicitTooltipOpacity",
+          "name": "Плотность подсказки 18+",
+          "description": "Насколько плотная подложка у плашки 18+.",
+          "type": "slider",
+          "min": 0,
+          "max": 100,
+          "step": 5,
+          "value": 45,
+          "defaultParameter": 45
+        }
+      ]
+    },
+    {
+      "title": "Интеграции",
+      "items": [
+        {
+          "id": "coverDownloadGlass",
+          "name": "Стекло кнопки скачивания обложки",
+          "description": "Оформляет кнопку скачивания обложки аддона CoverDownloader в стиле темы.",
+          "type": "button",
+          "bool": true,
+          "defaultParameter": true
+        },
+        {
+          "id": "coverDownloadBgOpacity",
+          "name": "Плотность кнопки скачивания",
+          "description": "Плотность подложки кнопки скачивания в обычном состоянии.",
+          "type": "slider",
+          "min": 0,
+          "max": 100,
+          "step": 5,
+          "value": 35,
+          "defaultParameter": 35
+        },
+        {
+          "id": "coverDownloadHoverBgOpacity",
+          "name": "Плотность кнопки при наведении",
+          "description": "Плотность подложки кнопки скачивания при наведении курсора.",
+          "type": "slider",
+          "min": 0,
+          "max": 100,
+          "step": 5,
+          "value": 60,
+          "defaultParameter": 60
+        },
+        {
+          "id": "tovibeGlass",
+          "name": "Стекло для ToVibe",
+          "description": "Оформляет форму «Новый вайб» аддона ToVibe в стиле темы.",
+          "type": "button",
+          "bool": true,
+          "defaultParameter": true
+        },
+        {
+          "id": "tovibeBgOpacity",
+          "name": "Плотность формы ToVibe",
+          "description": "Плотность подложки формы «Новый вайб».",
+          "type": "slider",
+          "min": 0,
+          "max": 100,
+          "step": 5,
+          "value": 35,
+          "defaultParameter": 35
+        },
+        {
+          "id": "tovibeCompact",
+          "name": "Компактная форма ToVibe",
+          "description": "Уменьшает высоту и шрифт поля «Новый вайб», чтобы оно лучше помещалось рядом с плеером.",
+          "type": "button",
+          "bool": false,
+          "defaultParameter": false
+        }
+      ]
+    },
+    {
+      "title": "Интерфейс",
+      "items": [
+        {
+          "id": "sidebarStyle",
+          "name": "Вид боковой панели (W.I.P.)",
+          "description": "Стандартный — как в приложении. Прозрачный — фон полностью убран, сквозь панель видны лучи волны. Жидкое стекло — полупрозрачная панель с размытием и рамкой. Функционал в разработке",
+          "type": "selector",
+          "value": "standard",
+          "options": {
+            "standard": { "event": "standard", "name": "Стандартный" },
+            "transparent": { "event": "transparent", "name": "Прозрачный" },
+            "glass": { "event": "glass", "name": "Жидкое стекло" }
+          },
+          "defaultValue": "standard"
+        },
+        {
+          "id": "hideFooter",
+          "name": "Скрыть футер",
+          "description": "Убирает нижний футер приложения.",
+          "type": "button",
+          "bool": true,
+          "defaultParameter": true
+        }
+      ]
+    }
+  ]
+}
