@@ -40,3 +40,5 @@ CoverDownloader, отдельные параметры стекла для пл�
 
 Исходные аддоны: **Minimalistic Wave Tab** и **YetAnotherBlurTheme**.
 Автор доработки и объединения: **BackUndoTap**.
+
+Полный список используемых сторонних библиотек и уведомлений об авторских правах см. в файле `THIRD-PARTY-NOTICES.md`.
