@@ -51,6 +51,14 @@
           "step": 1,
           "value": 8,
           "defaultParameter": 8
+        },
+        {
+          "id": "searchGlass",
+          "name": "Стекло строки поиска",
+          "description": "Полупрозрачная подложка с размытием у строки поиска на странице поиска.",
+          "type": "button",
+          "bool": true,
+          "defaultParameter": true
         }
       ]
     },
@@ -82,6 +90,14 @@
           "defaultParameter": true
         },
         {
+          "id": "artistCardGlass",
+          "name": "Стекло карточки артистов",
+          "description": "Полупрозрачная подложка с размытием у всплывающей карточки со списком артистов в полноэкранном плеере.",
+          "type": "button",
+          "bool": true,
+          "defaultParameter": true
+        },
+        {
           "id": "blurTooltip",
           "name": "Размытие подсказки таймкода",
           "description": "Сила размытия подсказки. Работает при включённом стекле подсказки.",
@@ -102,6 +118,17 @@
           "step": 5,
           "value": 5,
           "defaultParameter": 5
+        },
+        {
+          "id": "artistCardBgOpacity",
+          "name": "Фон карточки артистов",
+          "description": "Плотность стеклянной подложки карточки со списком артистов.",
+          "type": "slider",
+          "min": 0,
+          "max": 100,
+          "step": 5,
+          "value": 45,
+          "defaultParameter": 45
         }
       ]
     },
@@ -134,6 +161,17 @@
           "id": "buttonBgOpacity",
           "name": "Фон кнопок",
           "description": "Плотность подложки круглых кнопок плеера и полноэкранного режима.",
+          "type": "slider",
+          "min": 0,
+          "max": 100,
+          "step": 5,
+          "value": 35,
+          "defaultParameter": 35
+        },
+        {
+          "id": "searchBgOpacity",
+          "name": "Фон строки поиска",
+          "description": "Плотность стеклянной подложки строки поиска.",
           "type": "slider",
           "min": 0,
           "max": 100,
@@ -272,6 +310,14 @@
           "type": "button",
           "bool": true,
           "defaultParameter": true
+        },
+        {
+          "id": "disableVibeGradient",
+          "name": "Отключить градиент фона",
+          "description": "Делает цветной градиент страницы «Моя волна» полностью прозрачным, сохраняя его оттенки. Анимация волны остаётся видимой.",
+          "type": "button",
+          "bool": true,
+          "defaultParameter": true
         }
       ]
     },
@@ -323,6 +369,25 @@
           "step": 5,
           "value": 35,
           "defaultParameter": 35
+        },
+        {
+          "id": "volumeGlass",
+          "name": "Стекло слайдера громкости",
+          "description": "Полупрозрачная подложка с размытием у вертикального регулятора громкости в плеере «Моя волна».",
+          "type": "button",
+          "bool": true,
+          "defaultParameter": true
+        },
+        {
+          "id": "volumeBgOpacity",
+          "name": "Фон слайдера громкости",
+          "description": "Плотность стеклянной подложки регулятора громкости.",
+          "type": "slider",
+          "min": 0,
+          "max": 100,
+          "step": 5,
+          "value": 45,
+          "defaultParameter": 45
         },
         {
           "id": "explicitMarkGlass",
@@ -417,11 +482,38 @@
           "type": "selector",
           "value": "standard",
           "options": {
-            "standard": { "event": "standard", "name": "Стандартный" },
-            "transparent": { "event": "transparent", "name": "Прозрачный" },
-            "glass": { "event": "glass", "name": "Жидкое стекло" }
+            "standard": {
+              "event": "standard",
+              "name": "Стандартный"
+            },
+            "transparent": {
+              "event": "transparent",
+              "name": "Прозрачный"
+            },
+            "glass": {
+              "event": "glass",
+              "name": "Жидкое стекло"
+            }
           },
           "defaultValue": "standard"
+        },
+        {
+          "id": "timecodeDisplay",
+          "name": "Таймкод на главной странице",
+          "description": "Плашка над шкалой — стандартное поведение. Таймкод вместо названия — при наведении на шкалу прогресса таймкод текущей позиции показывается на месте названия трека, а плашка плавно скрывается. Действует только на главной странице «Моя волна».",
+          "type": "selector",
+          "value": "tooltip",
+          "options": {
+            "tooltip": {
+              "event": "tooltip",
+              "name": "Плашка над шкалой"
+            },
+            "title": {
+              "event": "title",
+              "name": "Таймкод вместо названия"
+            }
+          },
+          "defaultValue": "tooltip"
         },
         {
           "id": "hideFooter",

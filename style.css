@@ -17,33 +17,55 @@
         linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.015) 45%, rgba(255, 255, 255, 0) 72%);
 }
 
+/* ==== стеклянная строка поиска ==== */
+/* Подложка рисуется на корне компонента: он совпадает по размеру с
+   пилюлей ввода, но не создаёт лишнего контекста наложения, поэтому
+   анимированный градиент и подсказки остаются поверх стекла. */
+.ps-glass.ps-search-glass [class*="AnimatedSearchInput_root"] {
+    border-radius: var(--ym-radius-size-xxxl, 2.5rem);
+    background-color: color-mix(in srgb, #0f1116 var(--ps-search-bg-opacity, 35%), transparent);
+    background-image: var(--ps-glass-sheen-small);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.12),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.18),
+        0 0 0 1px rgba(255, 255, 255, 0.1),
+        0 8px 24px rgba(0, 0, 0, 0.2);
+    backdrop-filter: var(--ps-filter-base, blur(4px));
+    -webkit-backdrop-filter: var(--ps-filter-base, blur(4px));
+    transition: box-shadow 0.15s linear;
+}
+
+.ps-glass.ps-search-glass [class*="AnimatedSearchInput_root"]:has([class*="AnimatedSearchInput_searchInput"]:focus-within) {
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.18),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.22),
+        0 0 0 1px rgba(255, 255, 255, 0.2),
+        0 10px 28px rgba(0, 0, 0, 0.24);
+}
+
+/* Штатные фон и рамка пилюли перекрыли бы стекло — оставляем их
+   только как прозрачную оболочку для иконки, поля и кнопки очистки. */
+.ps-glass.ps-search-glass [class*="AnimatedSearchInput_root"] [class*="AnimatedSearchInput_searchInput"]:is(:hover, :active, :focus-within),
+.ps-glass.ps-search-glass [class*="AnimatedSearchInput_root"] [class*="AnimatedSearchInput_searchInput"] {
+    background: transparent !important;
+    background-color: transparent !important;
+    background-image: none !important;
+    box-shadow: none !important;
+}
+
 /* ==== положение плеера ==== */
 [data-test-id="PLAYERBAR_DESKTOP"] {
     position: absolute !important;
     z-index: var(--ym-z-index-player);
     width: calc(100% - var(--ym-spacer-size-m) * 2) !important;
+    bottom: var(--ym-spacer-size-m);
 }
 
 [data-test-id="MOBILE_PLAYERBAR"] {
     bottom: calc(var(--ym-spacer-size-m) + 679px);
 }
 
-[data-test-id="PLAYERBAR_DESKTOP"] {
-    bottom: var(--ym-spacer-size-m);
-}
-
 /* ==== размытие элементов ==== */
-.ps-glass .PlayerBar_root__cXUnU {
-    backdrop-filter: var(--ps-filter-base, blur(4px));
-}
-
-.ps-glass .CommonLayout_compositePlayerBar__hjZRp,
-.ps-glass .LikesAndHistoryItem_root__oI1gk,
-.ps-glass .s7_MO4NdsYs7nPQALD8W,
-.ps-glass .BaseNotification_root__FwcCd {
-    backdrop-filter: var(--ps-filter-panel, blur(8px));
-}
-
 /* Подложка модальных окон должна быть прозрачной и без фильтров:
    иначе размытие искажает весь интерфейс за окном. */
 .ps-glass .Gr0NtROEpipzr518Mwr6 {
@@ -97,11 +119,30 @@
     z-index: 1000 !important;
 }
 
+/* Всплывающая карточка со списком артистов в полноэкранном плеере.
+   Класс tooltipContent навешивается на корень тултипа вместе с хэшем
+   приложения, поэтому привязываемся к роли и стабильной части класса. */
+.ps-glass.ps-artist-card-glass
+    [role="tooltip"][class*="SeparatedArtistsWithContextMenuDesktop_tooltipContent"] {
+    background-color: color-mix(
+        in srgb,
+        var(--ym-controls-color-secondary-outline-selected) var(--ps-artist-card-bg-opacity, 45%),
+        transparent
+    ) !important;
+    background-image: var(--ps-glass-sheen);
+    backdrop-filter: var(--ps-filter-panel, blur(8px)) !important;
+    -webkit-backdrop-filter: var(--ps-filter-panel, blur(8px)) !important;
+    box-shadow:
+        0 12px 32px rgba(0, 0, 0, 0.35),
+        var(--ps-glass-rim-small);
+}
+
 .ps-glass .PBhQ1krUFiAybu_BS2YE:hover:before {
     backdrop-filter: blur(1.5px);
 }
 
 .ps-glass .CommonLayout_compositePlayerBar__hjZRp {
+    backdrop-filter: var(--ps-filter-panel, blur(8px));
     background-color: color-mix(in srgb, var(--ym-background-color-primary-enabled-basic) var(--ps-popover-bg-opacity, 35%), transparent) !important;
     background-image: var(--ps-glass-sheen);
     box-shadow: var(--ps-glass-rim-small) !important;
@@ -109,12 +150,14 @@
 
 .ps-glass .s7_MO4NdsYs7nPQALD8W,
 .ps-glass .BaseNotification_root__FwcCd {
+    backdrop-filter: var(--ps-filter-panel, blur(8px));
     background-color: color-mix(in srgb, var(--ym-controls-color-secondary-outline-selected) 50%, transparent) !important;
     background-image: var(--ps-glass-sheen);
     box-shadow: var(--ps-glass-rim-small) !important;
 }
 
 .ps-glass .PlayerBar_root__cXUnU {
+    backdrop-filter: var(--ps-filter-base, blur(4px));
     background-color: color-mix(in srgb, var(--player-average-color-background, var(--ym-background-color-primary-enabled-player)) var(--ps-player-bg-opacity, 40%), transparent) !important;
     background-image: var(--ps-glass-sheen);
     box-shadow: var(--ps-glass-rim) !important;
@@ -286,7 +329,7 @@
     padding-block-end: 0px !important;
 }
 
-.ps-glass .CommonLayout_root__WC_W1:not(:has(.PlayerBar_fullScreenAnimation_in))::after {
+.ps-glass .CommonLayout_root__WC_W1:not(:has(.ps-player-enter))::after {
     content: "";
     position: absolute;
     z-index: 299;
@@ -307,11 +350,11 @@
     transition-duration: var(--ps-fullscreen-anim-duration, 300ms), var(--ps-fullscreen-anim-duration, 300ms), 600ms !important;
 }
 
-.PlayerBar_fullScreenAnimation_in {
-    animation: PlayerBar_fullScreenAnimation_inAnimation var(--ps-fullscreen-anim-duration, 300ms) forwards;
+.ps-player-enter {
+    animation: ps-player-enter-frames var(--ps-fullscreen-anim-duration, 300ms) forwards;
 }
 
-@keyframes PlayerBar_fullScreenAnimation_inAnimation {
+@keyframes ps-player-enter-frames {
     25% {
         opacity: 0.75;
         translate: 0 calc(50% + var(--ym-spacer-size-m));
@@ -324,11 +367,11 @@
 }
 
 /* Плавное исчезновение без масштабирования — когда включена настройка ps-fullscreen-smooth-bg */
-.ps-fullscreen-smooth-bg .PlayerBar_fullScreenAnimation_in {
-    animation: PlayerBar_fullScreenAnimation_inSmooth var(--ps-fullscreen-anim-duration, 300ms) ease-out forwards;
+.ps-fullscreen-smooth-bg .ps-player-enter {
+    animation: ps-player-enter-soft-frames var(--ps-fullscreen-anim-duration, 300ms) ease-out forwards;
 }
 
-@keyframes PlayerBar_fullScreenAnimation_inSmooth {
+@keyframes ps-player-enter-soft-frames {
     from {
         opacity: 1;
         translate: 0 0;
@@ -340,27 +383,27 @@
     }
 }
 
-.PlayerBar_fullScreenAnimation_out {
-    animation-name: PlayerBar_fullScreenAnimation_outAnimation;
+.ps-player-leave {
+    animation-name: ps-player-leave-frames;
     animation-duration: var(--ps-fullscreen-anim-duration, 300ms);
 }
 
-@keyframes PlayerBar_fullScreenAnimation_outAnimation {
+@keyframes ps-player-leave-frames {
     from {
         translate: 0 -12px;
         opacity: 0;
     }
 }
 
-.FullscreenCoverCopy_animationLeft {
-    animation: FullscreenCoverCopy_animationLeftKeys 500ms forwards;
+.ps-cover-slide-left {
+    animation: ps-cover-slide-left-frames 500ms forwards;
 }
 
-.FullscreenCoverCopy.FullscreenCoverCopy_animationLeft {
+.ps-cover-ghost.ps-cover-slide-left {
     order: 0;
 }
 
-@keyframes FullscreenCoverCopy_animationLeftKeys {
+@keyframes ps-cover-slide-left-frames {
     from {
         translate: 0 0;
     }
@@ -369,15 +412,15 @@
     }
 }
 
-.FullscreenCoverCopy_animationRight {
-    animation: FullscreenCoverCopy_animationRightKeys 500ms forwards;
+.ps-cover-slide-right {
+    animation: ps-cover-slide-right-frames 500ms forwards;
 }
 
-.FullscreenCoverCopy.FullscreenCoverCopy_animationRight {
+.ps-cover-ghost.ps-cover-slide-right {
     order: 1;
 }
 
-@keyframes FullscreenCoverCopy_animationRightKeys {
+@keyframes ps-cover-slide-right-frames {
     from {
         translate: -100% 0;
     }
@@ -389,7 +432,7 @@
 /* В новых версиях плеера приложение само рисует карусель обложек
    previous/active/next. Клон темы в этом случае не нужен: он дублирует
    предыдущую обложку и остаётся слева после переключения трека. */
-.FullscreenPlayerDesktopPoster_root__d__YD:has([class*="FullscreenPlayerDesktopPoster_cover_queue"]) .FullscreenCoverCopy {
+.FullscreenPlayerDesktopPoster_root__d__YD:has([class*="FullscreenPlayerDesktopPoster_cover_queue"]) .ps-cover-ghost {
     display: none !important;
 }
 
@@ -446,6 +489,33 @@
     ) !important;
     backdrop-filter: var(--ps-filter-panel, blur(8px));
     -webkit-backdrop-filter: var(--ps-filter-panel, blur(8px));
+}
+
+/* ==== отключение градиента фона «Моей волны» ==== */
+/* Каждый стоп сохраняет свой оттенок (h s l), но получает нулевую
+   альфу: градиент перестаёт быть видимым, а зарегистрированные
+   @property-переменные продолжают анимироваться без рывка. */
+.ps-no-vibe-gradient [class*="DefaultLayout_rootNewVibe"] {
+    background: transparent !important;
+    background: linear-gradient(
+        var(--vibe-gradient-angle, 180deg),
+        hsl(from var(--vibe-gradient-stop-0) h s l / 0) 0,
+        hsl(from var(--vibe-gradient-stop-1) h s l / 0) 10%,
+        hsl(from var(--vibe-gradient-stop-2) h s l / 0) 19%,
+        hsl(from var(--vibe-gradient-stop-3) h s l / 0) 25%,
+        hsl(from var(--vibe-gradient-stop-4) h s l / 0) 30%,
+        hsl(from var(--vibe-gradient-stop-5) h s l / 0) 34%,
+        hsl(from var(--vibe-gradient-stop-6) h s l / 0) 37%,
+        hsl(from var(--vibe-gradient-stop-7) h s l / 0) 40%,
+        hsl(from var(--vibe-gradient-stop-8) h s l / 0) 42%,
+        hsl(from var(--vibe-gradient-stop-9) h s l / 0) 44%,
+        hsl(from var(--vibe-gradient-stop-10) h s l / 0) 47%,
+        hsl(from var(--vibe-gradient-stop-11) h s l / 0) 50%,
+        hsl(from var(--vibe-gradient-stop-12) h s l / 0) 54%,
+        hsl(from var(--vibe-gradient-stop-13) h s l / 0) 60%,
+        hsl(from var(--vibe-gradient-stop-14) h s l / 0) 67%,
+        hsl(from var(--vibe-gradient-stop-15) h s l / 0) 75%
+    ) !important;
 }
 
 /* ==== Minimalistic Wave Tab: раскладка «Моя волна» (.ps-wave-layout) ==== */
@@ -510,7 +580,7 @@
 
 /* Убираем нижнюю полосу-омывание (::after с backdrop-filter), которая
    создаёт видимый оттенок другой оттенок в полноэкранном режиме волны. */
-.ps-wave-layout .CommonLayout_root__WC_W1:not(:has(.PlayerBar_fullScreenAnimation_in))::after {
+.ps-wave-layout .CommonLayout_root__WC_W1:not(:has(.ps-player-enter))::after {
     display: none !important;
     content: none !important;
     backdrop-filter: none !important;
@@ -980,12 +1050,6 @@
   max-width: 100% !important;
 }
 
-.ps-wave-layout [class*="VibePage_meta"][data-ps-layout-mode="overlay"] {
-  margin-left: 0 !important;
-  width: 100% !important;
-  max-width: 100% !important;
-}
-
 /* === МЕДИА-ЗАПРОСЫ === */
 @media (max-width: 760px) {
   .ps-wave-layout [class*="VibePage_meta"] {
@@ -1084,6 +1148,31 @@
     box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ym-controls-color-secondary-on_default-enabled) 12%, transparent), inset 0 1px 0 rgba(255, 255, 255, 0.18);
 }
 
+/* Вертикальный регулятор громкости: стеклянная капсула вокруг шкалы.
+   Панель всплывает над плеером, поэтому размытие берём панельное. */
+.ps-glass.ps-vibe-glass.ps-volume-glass [class*="ChangeVolume_wrapperSlider"] {
+    background-color: color-mix(
+        in srgb,
+        var(--ym-background-color-primary-enabled-popover) var(--ps-volume-bg-opacity, 45%),
+        transparent
+    ) !important;
+    background-image: var(--ps-glass-sheen);
+    backdrop-filter: var(--ps-filter-panel, blur(8px)) !important;
+    -webkit-backdrop-filter: var(--ps-filter-panel, blur(8px)) !important;
+    border: none !important;
+    box-shadow:
+        inset 0 0 0 1px color-mix(in srgb, var(--ym-controls-color-secondary-on_default-enabled) 12%, transparent),
+        inset 0 1px 0 rgba(255, 255, 255, 0.18),
+        0 8px 22px rgba(0, 0, 0, 0.22);
+}
+
+/* Подпись с процентами лежит в контейнере перед панелью. Backdrop-filter
+   делает панель отдельным слоем и перекрывает текст, поэтому поднимаем
+   подпись над стеклом. */
+.ps-glass.ps-vibe-glass.ps-volume-glass [class*="ChangeVolume_sliderContainer"] > span {
+    z-index: 2;
+}
+
 /* Всплывающая плашка «Возрастное ограничение 18+».
    Сам значок 18+ не стилизуем: стекло получает только подсказка, которая
    появляется при наведении на значок. Подсказка рендерится в портале,
@@ -1161,4 +1250,103 @@
 .ps-tovibe-compact #tovibe-widget .tovibe-clear {
     width: 44px !important;
     height: 44px !important;
+}
+
+/* ==== Таймкод на главной странице («Моя волна») ==== */
+/* Режим «Таймкод вместо названия»: при наведении на шкалу прогресса
+   название трека и стандартная плашка плавно уступают место таймкоду.
+   Показывается текущая позиция воспроизведения, а не точка под курсором.
+   Обычный нижний плеер не затрагивается. */
+
+/* Базовое состояние названия: свойства перехода заданы заранее,
+   поэтому кроссфейд работает в обе стороны. */
+.ps-timecode-title
+    [data-test-id="VIBE_PLAYERBAR"]
+    [data-test-id="VIBE_PLAYERBAR_TIMECODE_SLIDER"]
+    [data-test-id="VIBE_PLAYERBAR_TRACK_NAME"] > div {
+    transition:
+        opacity 180ms ease,
+        filter 220ms ease,
+        transform 260ms cubic-bezier(0.22, 1, 0.36, 1) !important;
+    will-change: opacity, filter, transform;
+}
+
+/* Наведение на шкалу: название мягко уходит вверх и растворяется. */
+.ps-timecode-title
+    [data-test-id="VIBE_PLAYERBAR"]
+    [data-test-id="VIBE_PLAYERBAR_TIMECODE_SLIDER"]:hover
+    [data-test-id="VIBE_PLAYERBAR_TRACK_NAME"] > div,
+.ps-timecode-title
+    [data-test-id="VIBE_PLAYERBAR"]
+    [data-test-id="VIBE_PLAYERBAR_TIMECODE_SLIDER"]:focus-within
+    [data-test-id="VIBE_PLAYERBAR_TRACK_NAME"] > div {
+    opacity: 0 !important;
+    filter: blur(3px);
+    transform: translateY(-3px) scale(0.985);
+}
+
+/* Стандартная плашка гаснет, используя собственный opacity-переход. */
+.ps-timecode-title
+    [data-test-id="VIBE_PLAYERBAR"]
+    [data-test-id="VIBE_PLAYERBAR_TIMECODE_SLIDER"]:hover
+    [data-test-id="VIBE_PLAYERBAR_TIMECODE"],
+.ps-timecode-title
+    [data-test-id="VIBE_PLAYERBAR"]
+    [data-test-id="VIBE_PLAYERBAR_TIMECODE_SLIDER"]:focus-within
+    [data-test-id="VIBE_PLAYERBAR_TIMECODE"] {
+    opacity: 0 !important;
+}
+
+.ps-timecode-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    color: inherit;
+    font-family: var(--ym-font-heading);
+    font-size: var(--dynamic-font-size, var(--ym-font-size-headline-xs));
+    font-style: normal;
+    font-weight: var(--ym-font-weight-bold);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: normal;
+    line-height: var(--dynamic-line-height, var(--ym-font-line-height-headline-xs));
+    text-align: center;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    filter: blur(3px);
+    transform: translateY(4px) scale(0.985);
+    transition:
+        opacity 160ms ease-out,
+        filter 220ms ease-out,
+        transform 260ms cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: opacity, filter, transform;
+}
+
+/* Таймкод появляется чуть позже названия — получается кроссфейд. */
+.ps-timecode-title
+    [data-test-id="VIBE_PLAYERBAR"]
+    [data-test-id="VIBE_PLAYERBAR_TIMECODE_SLIDER"]:hover
+    .ps-timecode-overlay,
+.ps-timecode-title
+    [data-test-id="VIBE_PLAYERBAR"]
+    [data-test-id="VIBE_PLAYERBAR_TIMECODE_SLIDER"]:focus-within
+    .ps-timecode-overlay {
+    opacity: 1 !important;
+    filter: blur(0);
+    transform: translateY(0) scale(1);
+    transition-delay: 45ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .ps-timecode-title
+        [data-test-id="VIBE_PLAYERBAR"]
+        [data-test-id="VIBE_PLAYERBAR_TIMECODE_SLIDER"]
+        [data-test-id="VIBE_PLAYERBAR_TRACK_NAME"] > div,
+    .ps-timecode-overlay {
+        transition: none !important;
+    }
 }

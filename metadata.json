@@ -4,7 +4,7 @@
     "banner": "banner.png",
     "libraryLogo": "",
     "author": "BackUndoTap",
-    "description": "Тема объединяет и дорабатывает аддоны Minimalistic Wave Tab (минималистичная «Моя волна») и YetAnotherBlurTheme (жидкое стекло): размытие и стеклянные подложки, анимации, плотность фона, три вида боковой панели и интеграции с ToVibe и CoverDownloader — всё настраивается в параметрах аддона.",
+    "description": "Тема добавляет размытие и стеклянные подложки, анимации, плотность фона, три вида боковой панели и интеграции с ToVibe и CoverDownloader — всё настраивается в параметрах аддона.",
     "version": "1.0.0",
     "css": "style.css",
     "script": "script.js",

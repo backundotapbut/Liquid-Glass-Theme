@@ -2,7 +2,7 @@
     'use strict';
 
     // Имя должно совпадать с metadata.json: по нему PulseSync отдаёт настройки.
-    const ADDON_NAME = 'LiquidGlassTheme [W.I.P]';
+    const ADDON_NAME = 'LiquidGlassTheme';
 
     const DEFAULTS = {
         // Стекло
@@ -11,9 +11,13 @@
         glassSaturation: 180,
         blurBase: 4,
         blurPanels: 8,
+        searchGlass: true,
+        searchBgOpacity: 35,
         tooltipGlass: true,
         blurTooltip: 4,
         tooltipBgOpacity: 5,
+        artistCardGlass: true,
+        artistCardBgOpacity: 45,
         playerBgOpacity: 40,
         popoverBgOpacity: 35,
         buttonBgOpacity: 35,
@@ -29,6 +33,8 @@
         progressBgOpacity: 35,
         controlsGlassEnabled: true,
         controlsBgOpacity: 35,
+        volumeGlass: true,
+        volumeBgOpacity: 45,
         explicitMarkGlass: true,
         explicitTooltipOpacity: 45,
         // Интеграции
@@ -50,12 +56,15 @@
         coverOffsetX: 0,
         hideVibeBanner: true,
         hideVibeArtist: true,
+        disableVibeGradient: true,
         // Интерфейс
         sidebarStyle: 'standard',
+        timecodeDisplay: 'tooltip',
         hideFooter: true
     };
 
     const SIDEBAR_STYLES = ['standard', 'transparent', 'glass'];
+    const TIMECODE_DISPLAY_MODES = ['tooltip', 'title'];
 
     let currentSettings = {};
     let settingsApi = null;
@@ -96,6 +105,25 @@
         return 'standard';
     }
 
+    // Режим таймкода на главной странице: плашка над шкалой (tooltip)
+    // или таймкод вместо названия трека (title).
+    function normalizeTimecodeDisplay(raw) {
+        let value = raw;
+        if (value && typeof value === 'object' && !Array.isArray(value)) {
+            if (typeof value.value !== 'undefined') value = value.value;
+            else if (typeof value.selected !== 'undefined') value = value.selected;
+            else if (typeof value.default !== 'undefined') value = value.default;
+            else if (typeof value.defaultValue !== 'undefined') value = value.defaultValue;
+        }
+        const text = String(value == null ? '' : value).trim().toLowerCase();
+        if (TIMECODE_DISPLAY_MODES.includes(text)) return text;
+        const index = Number(text);
+        if (Number.isInteger(index) && index >= 1 && index <= TIMECODE_DISPLAY_MODES.length) {
+            return TIMECODE_DISPLAY_MODES[index - 1];
+        }
+        return 'tooltip';
+    }
+
     function readNumber(settings, key) {
         const value = Number(readSetting(settings, key));
         return Number.isFinite(value) ? value : DEFAULTS[key];
@@ -119,7 +147,7 @@
 
     function buildFilter(blurPx, liquidGlass, settings) {
         const px = clampNumber(Math.round(Number(blurPx) || 0), 0, 60);
-        const prefix = liquidGlass ? 'url(#liquidGlassFilter) ' : '';
+        const prefix = liquidGlass ? 'url(#ps-glass-distortion) ' : '';
         return prefix + buildGlassEnhance(settings) + ' blur(' + px + 'px)';
     }
 
@@ -135,23 +163,19 @@
     // Жидкое стекло: SVG-фильтр, на который ссылается style.css
     // ─────────────────────────────────────────────────────────────
 
-    function addLiquidGlass() {
-        if (document.getElementById('liquidGlassFilter')) return;
+    function mountDistortionFilter() {
+        if (document.getElementById('ps-glass-distortion')) return;
 
-        const liquidGlassFilter = document.createElement('svg');
-        liquidGlassFilter.innerHTML = `<svg style="display: none">
-                            <filter id="liquidGlassFilter">
-                                <feImage href="data:image/png;base64,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" preserveAspectRatio="none"/>
-                                <feDisplacementMap
-                                        in="SourceGraphic"
-                                        in2="turbulence"
-                                        scale="600"
-                                        xChannelSelector="R"
-                                        yChannelSelector="G"
-                                />
-                            </filter>
-                        </svg>`;
-        document.body.appendChild(liquidGlassFilter.firstChild);
+        const host = document.createElement('div');
+        host.innerHTML = [
+            '<svg style="display: none" aria-hidden="true">',
+            '<filter id="ps-glass-distortion">',
+            '<feImage href="data:image/png;base64,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" preserveAspectRatio="none"/>',
+            '<feDisplacementMap in="SourceGraphic" in2="turbulence" scale="600" xChannelSelector="R" yChannelSelector="G"/>',
+            '</filter>',
+            '</svg>'
+        ].join('');
+        document.body.append(host.firstElementChild);
     }
 
     // ─────────────────────────────────────────────────────────────
@@ -162,16 +186,20 @@
         const glassEnabled = !!readSetting(settings, 'glassEnabled');
         const liquidGlass = !!readSetting(settings, 'liquidGlass');
         const tooltipGlass = !!readSetting(settings, 'tooltipGlass');
+        const artistCardGlass = !!readSetting(settings, 'artistCardGlass');
         const fullscreenGlassEnabled = !!readSetting(settings, 'fullscreenGlassEnabled');
         const popupGlassEnabled = !!readSetting(settings, 'popupGlassEnabled');
         const fullscreenSmoothBg = !!readSetting(settings, 'fullscreenSmoothBg');
         const vibeGlassEnabled = !!readSetting(settings, 'vibeGlassEnabled');
         const progressGlassEnabled = !!readSetting(settings, 'progressGlassEnabled');
         const controlsGlassEnabled = !!readSetting(settings, 'controlsGlassEnabled');
+        const volumeGlass = !!readSetting(settings, 'volumeGlass');
         const explicitMarkGlass = !!readSetting(settings, 'explicitMarkGlass');
         const tovibeGlass = !!readSetting(settings, 'tovibeGlass');
         const tovibeCompact = !!readSetting(settings, 'tovibeCompact');
         const coverDownloadGlass = !!readSetting(settings, 'coverDownloadGlass');
+        const searchGlass = !!readSetting(settings, 'searchGlass');
+        const disableVibeGradient = !!readSetting(settings, 'disableVibeGradient');
 
         const html = document.documentElement;
 
@@ -183,10 +211,18 @@
 
         html.classList.toggle('ps-glass', glassEnabled);
         html.classList.toggle('ps-tooltip-glass', glassEnabled && tooltipGlass);
+        html.classList.toggle('ps-artist-card-glass', glassEnabled && artistCardGlass);
         html.classList.toggle('ps-fullscreen-glass', glassEnabled && fullscreenGlassEnabled);
         html.classList.toggle('ps-popup-glass', glassEnabled && popupGlassEnabled);
         html.classList.toggle('ps-fullscreen-smooth-bg', fullscreenSmoothBg);
         html.classList.toggle('ps-hide-footer', !!readSetting(settings, 'hideFooter'));
+        const timecodeTitle = normalizeTimecodeDisplay(readSetting(settings, 'timecodeDisplay')) === 'title';
+        html.classList.toggle('ps-timecode-title', timecodeTitle);
+        if (timecodeTitle) {
+            ensureTimecodeOverlays();
+        } else {
+            stopTimecodeLoop();
+        }
         html.classList.toggle('ps-wave-layout', !!readSetting(settings, 'waveLayoutEnabled'));
         html.classList.toggle('ps-hide-vibe-artist', !!readSetting(settings, 'hideVibeArtist'));
 
@@ -195,6 +231,7 @@
         html.classList.toggle('ps-vibe-glass', vibeGlass);
         html.classList.toggle('ps-progress-glass', vibeGlass && progressGlassEnabled);
         html.classList.toggle('ps-controls-glass', vibeGlass && controlsGlassEnabled);
+        html.classList.toggle('ps-volume-glass', vibeGlass && volumeGlass);
         html.classList.toggle('ps-explicit-glass', vibeGlass && explicitMarkGlass);
 
         // Интеграция с ToVibe.
@@ -203,6 +240,10 @@
 
         // Интеграция с CoverDownloader: стеклянная кнопка скачивания обложки.
         html.classList.toggle('ps-cover-download-glass', glassEnabled && coverDownloadGlass);
+
+        // Стеклянная строка поиска и прозрачный градиент страницы волны.
+        html.classList.toggle('ps-search-glass', glassEnabled && searchGlass);
+        html.classList.toggle('ps-no-vibe-gradient', disableVibeGradient);
 
         setRootVar('--ps-filter-base', buildFilter(readNumber(settings, 'blurBase'), liquidGlass, settings));
         setRootVar('--ps-filter-panel', buildFilter(readNumber(settings, 'blurPanels'), liquidGlass, settings));
@@ -219,6 +260,7 @@
         setRootVar('--ps-sidebar-filter', buildFilter(18, false, settings));
 
         setRootVar('--ps-tooltip-bg-opacity', clampNumber(readNumber(settings, 'tooltipBgOpacity'), 0, 100) + '%');
+        setRootVar('--ps-artist-card-bg-opacity', clampNumber(readNumber(settings, 'artistCardBgOpacity'), 0, 100) + '%');
         setRootVar('--ps-player-bg-opacity', clampNumber(readNumber(settings, 'playerBgOpacity'), 0, 100) + '%');
         setRootVar('--ps-popover-bg-opacity', clampNumber(readNumber(settings, 'popoverBgOpacity'), 0, 100) + '%');
         setRootVar('--ps-button-bg-opacity', clampNumber(readNumber(settings, 'buttonBgOpacity'), 0, 100) + '%');
@@ -226,8 +268,10 @@
         setRootVar('--ps-cover-download-hover-bg-opacity', clampNumber(readNumber(settings, 'coverDownloadHoverBgOpacity'), 0, 100) + '%');
         setRootVar('--ps-progress-bg-opacity', clampNumber(readNumber(settings, 'progressBgOpacity'), 0, 100) + '%');
         setRootVar('--ps-controls-bg-opacity', clampNumber(readNumber(settings, 'controlsBgOpacity'), 0, 100) + '%');
+        setRootVar('--ps-volume-bg-opacity', clampNumber(readNumber(settings, 'volumeBgOpacity'), 0, 100) + '%');
         setRootVar('--ps-explicit-tooltip-opacity', clampNumber(readNumber(settings, 'explicitTooltipOpacity'), 0, 100) + '%');
         setRootVar('--ps-tovibe-bg-opacity', clampNumber(readNumber(settings, 'tovibeBgOpacity'), 0, 100) + '%');
+        setRootVar('--ps-search-bg-opacity', clampNumber(readNumber(settings, 'searchBgOpacity'), 0, 100) + '%');
 
         const animDuration = clampNumber(Math.round(readNumber(settings, 'fullscreenAnimationDuration')), 50, 2000);
         setRootVar('--ps-fullscreen-anim-duration', animDuration + 'ms');
@@ -240,159 +284,151 @@
     // Полноэкранный плеер: анимация открытия/закрытия и смена обложки
     // ─────────────────────────────────────────────────────────────
 
-    let lastChangeMethod = null;
+    let queueMoveDirection = null;
 
-    function initFullscreenAnimations() {
-        function onOpen(node) {
-            const player = document.body.querySelector('[data-test-id="PLAYERBAR_DESKTOP"], [data-test-id="MOBILE_FULLSCREEN_PLAYER_MODAL"]');
-            if (!player) return;
+    function setupPlayerMotion() {
+        function handlePlayerOpen(modalNode) {
+            const playerRoot = document.body.querySelector('[data-test-id="PLAYERBAR_DESKTOP"], [data-test-id="MOBILE_FULLSCREEN_PLAYER_MODAL"]');
+            if (!playerRoot) return;
 
-            let imageObserver = null;
-            let coverObserver = null;
+            let coverSrcWatcher = null;
+            let posterWatcher = null;
 
             if (readSetting(currentSettings, 'fullscreenAnimations')) {
-                player.classList.add('PlayerBar_fullScreenAnimation_in');
-                player.classList.remove('PlayerBar_fullScreenAnimation_out');
+                playerRoot.classList.add('ps-player-enter');
+                playerRoot.classList.remove('ps-player-leave');
 
-                const fsStyleObserver = new MutationObserver((mutationsList) => {
+                const slideStyleWatcher = new MutationObserver((changes) => {
                     if (!readSetting(currentSettings, 'fullscreenAnimations')) return;
-                    for (const mutation of mutationsList) {
-                        if (mutation.attributeName !== 'style') continue;
-                        const oldValue = mutation.oldValue;
-                        const newValue = mutation.target.getAttribute('style');
-                        if ((!oldValue && newValue) || (oldValue && newValue && oldValue === newValue)) continue;
-                        const regex = /transform: translate\(\S*,\s*(-?\d+(?:.\d+)?)%\)/;
-                        const oldTransform = regex.exec(oldValue);
-                        const newTransform = regex.exec(newValue);
-                        if (oldTransform && newTransform && parseFloat(oldTransform[1]) < parseFloat(newTransform[1])) {
-                            onClose(player);
+                    for (const change of changes) {
+                        if (change.attributeName !== 'style') continue;
+                        const before = change.oldValue;
+                        const after = change.target.getAttribute('style');
+                        if ((!before && after) || (before && after && before === after)) continue;
+                        const shift = /transform: translate\(\S*,\s*(-?\d+(?:.\d+)?)%\)/;
+                        const from = shift.exec(before);
+                        const to = shift.exec(after);
+                        if (from && to && parseFloat(from[1]) < parseFloat(to[1])) {
+                            startPlayerClose(playerRoot);
                             break;
                         }
                     }
                 });
-                fsStyleObserver.observe(node, { attributes: true, attributeFilter: ['style'], attributeOldValue: true });
+                slideStyleWatcher.observe(modalNode, { attributes: true, attributeFilter: ['style'], attributeOldValue: true });
             }
 
-            const removerObserver = new MutationObserver((mutations) => {
-                mutations.forEach((mutation) => {
-                    mutation.removedNodes.forEach((removedNode) => {
-                        if (removedNode === node || (removedNode.contains && removedNode.contains(node))) {
-                            afterClose(player);
-                            removerObserver.disconnect();
-                            if (imageObserver) imageObserver.disconnect();
-                            if (coverObserver) coverObserver.disconnect();
+            const playerDetachWatcher = new MutationObserver((changes) => {
+                changes.forEach((change) => {
+                    change.removedNodes.forEach((removedNode) => {
+                        if (removedNode === modalNode || (removedNode.contains && removedNode.contains(modalNode))) {
+                            resetPlayerMotion(playerRoot);
+                            playerDetachWatcher.disconnect();
+                            if (coverSrcWatcher) coverSrcWatcher.disconnect();
+                            if (posterWatcher) posterWatcher.disconnect();
                         }
                     });
                 });
             });
-            removerObserver.observe(document.body, { childList: true, subtree: true });
+            playerDetachWatcher.observe(document.body, { childList: true, subtree: true });
 
-            // === анимация смены обложки ===
-            if (readSetting(currentSettings, 'coverAnimations')) {
-                const poster = node.querySelector('[class*="FullscreenPlayerDesktopPoster_root"]');
-                const hasNativeCoverCarousel = () => !!(poster && poster.querySelector('[class*="FullscreenPlayerDesktopPoster_cover_queue"]'));
+            if (!readSetting(currentSettings, 'coverAnimations')) return;
 
-                // В новых версиях приложение само рисует карусель обложек
-                // previous/active/next. Клон из темы в этом случае дублирует
-                // предыдущую обложку и остаётся слева после переключения.
-                if (!hasNativeCoverCarousel()) {
-                    const image = node.querySelector('*:not(:has(.FullscreenCoverCopy)) > [data-test-id="ENTITY_COVER_IMAGE"]');
-                    if (image) {
-                        const newImage = image.cloneNode(true);
-                        newImage.classList.add('FullscreenCoverCopy');
-                        newImage.removeAttribute('srcset');
-                        newImage.removeAttribute('data-test-id');
-                        image.parentNode.insertBefore(newImage, image);
-                        newImage.addEventListener('animationend', (event) => {
-                            if (!event.animationName.startsWith('FullscreenCoverCopy_')) return;
-                            newImage.style.visibility = 'hidden';
-                        });
+            const poster = modalNode.querySelector('[class*="FullscreenPlayerDesktopPoster_root"]');
+            const hasAppCoverCarousel = () => !!(poster && poster.querySelector('[class*="FullscreenPlayerDesktopPoster_cover_queue"]'));
+            if (hasAppCoverCarousel()) return;
 
-                        imageObserver = new MutationObserver((mutationList) => {
-                            if (!readSetting(currentSettings, 'coverAnimations')) return;
-                            if (hasNativeCoverCarousel()) {
-                                newImage.remove();
-                                imageObserver.disconnect();
-                                if (coverObserver) {
-                                    coverObserver.disconnect();
-                                    coverObserver = null;
-                                }
-                                return;
-                            }
-                            for (const mutation of mutationList) {
-                                const oldValue = mutation.oldValue;
-                                const realValue = mutation.target.src;
-                                if (oldValue == realValue) continue;
-                                newImage.src = oldValue;
+            const coverImage = modalNode.querySelector('*:not(:has(.ps-cover-ghost)) > [data-test-id="ENTITY_COVER_IMAGE"]');
+            if (!coverImage) return;
 
-                                const imgs = [newImage, image];
-                                imgs.forEach((img) => {
-                                    img.classList.remove('FullscreenCoverCopy_animationLeft');
-                                    img.classList.remove('FullscreenCoverCopy_animationRight');
-                                });
+            const ghostCover = coverImage.cloneNode(true);
+            ghostCover.classList.add('ps-cover-ghost');
+            ghostCover.removeAttribute('srcset');
+            ghostCover.removeAttribute('data-test-id');
+            coverImage.parentNode.insertBefore(ghostCover, coverImage);
+            ghostCover.addEventListener('animationend', (event) => {
+                if (!event.animationName.startsWith('ps-cover-slide-')) return;
+                ghostCover.style.visibility = 'hidden';
+            });
 
-                                requestAnimationFrame(() => {
-                                    const classSuffix = lastChangeMethod && lastChangeMethod.toLowerCase().includes('movebackward') ? 'Right' : 'Left';
-                                    lastChangeMethod = null;
-                                    newImage.style.visibility = '';
-                                    imgs.forEach((img) => {
-                                        img.classList.add('FullscreenCoverCopy_animation' + classSuffix);
-                                    });
-                                });
-                            }
-                        });
-                        imageObserver.observe(image, { attributes: true, attributeFilter: ['src'], attributeOldValue: true });
-
-                        // Если приложение отрисует свою карусель чуть позже,
-                        // убираем клон, чтобы он не остался второй обложкой.
-                        if (poster) {
-                            coverObserver = new MutationObserver(() => {
-                                if (!hasNativeCoverCarousel()) return;
-                                newImage.remove();
-                                if (imageObserver) imageObserver.disconnect();
-                                if (coverObserver) {
-                                    coverObserver.disconnect();
-                                    coverObserver = null;
-                                }
-                            });
-                            coverObserver.observe(poster, { childList: true, subtree: true });
-                        }
+            coverSrcWatcher = new MutationObserver((changes) => {
+                if (!readSetting(currentSettings, 'coverAnimations')) return;
+                if (hasAppCoverCarousel()) {
+                    ghostCover.remove();
+                    coverSrcWatcher.disconnect();
+                    if (posterWatcher) {
+                        posterWatcher.disconnect();
+                        posterWatcher = null;
                     }
+                    return;
                 }
+                for (const change of changes) {
+                    const before = change.oldValue;
+                    const freshSrc = change.target.src;
+                    if (before == freshSrc) continue;
+                    ghostCover.src = before;
+
+                    const covers = [ghostCover, coverImage];
+                    covers.forEach((cover) => {
+                        cover.classList.remove('ps-cover-slide-left');
+                        cover.classList.remove('ps-cover-slide-right');
+                    });
+
+                    requestAnimationFrame(() => {
+                        const motionSide = queueMoveDirection && queueMoveDirection.toLowerCase().includes('movebackward') ? 'right' : 'left';
+                        queueMoveDirection = null;
+                        ghostCover.style.visibility = '';
+                        covers.forEach((cover) => {
+                            cover.classList.add('ps-cover-slide-' + motionSide);
+                        });
+                    });
+                }
+            });
+            coverSrcWatcher.observe(coverImage, { attributes: true, attributeFilter: ['src'], attributeOldValue: true });
+
+            if (poster) {
+                posterWatcher = new MutationObserver(() => {
+                    if (!hasAppCoverCarousel()) return;
+                    ghostCover.remove();
+                    if (coverSrcWatcher) coverSrcWatcher.disconnect();
+                    if (posterWatcher) {
+                        posterWatcher.disconnect();
+                        posterWatcher = null;
+                    }
+                });
+                posterWatcher.observe(poster, { childList: true, subtree: true });
             }
-            /* === */
         }
 
-        function onClose(player) {
-            player.classList.remove('PlayerBar_fullScreenAnimation_in');
-            player.classList.add('PlayerBar_fullScreenAnimation_out');
+        function startPlayerClose(playerRoot) {
+            playerRoot.classList.remove('ps-player-enter');
+            playerRoot.classList.add('ps-player-leave');
         }
 
-        function afterClose(player) {
-            player.classList.remove('PlayerBar_fullScreenAnimation_in');
-            player.classList.remove('PlayerBar_fullScreenAnimation_out');
+        function resetPlayerMotion(playerRoot) {
+            playerRoot.classList.remove('ps-player-enter');
+            playerRoot.classList.remove('ps-player-leave');
         }
 
-        const observer = new MutationObserver((mutationList) => {
+        const modalAppearWatcher = new MutationObserver((changes) => {
             if (!readSetting(currentSettings, 'fullscreenAnimations') && !readSetting(currentSettings, 'coverAnimations')) return;
-            for (const mutation of mutationList) {
-                mutation.addedNodes.forEach((node) => {
-                    if (!node || typeof node.querySelector !== 'function') return;
-                    const modal = node.matches && node.matches('[data-test-id="FULLSCREEN_PLAYER_MODAL"]')
-                        ? node
-                        : node.querySelector('[data-test-id="FULLSCREEN_PLAYER_MODAL"]');
-                    if (modal instanceof HTMLElement) onOpen(modal);
+            for (const change of changes) {
+                change.addedNodes.forEach((addedNode) => {
+                    if (!addedNode || typeof addedNode.querySelector !== 'function') return;
+                    const modal = addedNode.matches && addedNode.matches('[data-test-id="FULLSCREEN_PLAYER_MODAL"]')
+                        ? addedNode
+                        : addedNode.querySelector('[data-test-id="FULLSCREEN_PLAYER_MODAL"]');
+                    if (modal instanceof HTMLElement) handlePlayerOpen(modal);
                 });
             }
         });
-        observer.observe(document.body, { childList: true });
+        modalAppearWatcher.observe(document.body, { childList: true });
 
         if (window.pulsesyncApi && typeof window.pulsesyncApi._waitForPlayer === 'function') {
             window.pulsesyncApi._waitForPlayer(() => {
                 const entity = window.sonataState && window.sonataState.queueState && window.sonataState.queueState.currentEntity;
                 if (entity && typeof entity.onChange === 'function') {
                     entity.onChange((value) => {
-                        lastChangeMethod = value && value.lastChangeMethod;
+                        queueMoveDirection = value && value.lastChangeMethod;
                     });
                 }
             });
@@ -578,7 +614,6 @@
         if (root) {
             root.style.removeProperty('--ps-wheel-width');
             root.style.removeProperty('--ps-wheel-max-width');
-            root.style.removeProperty('--ps-overlay-content-shift');
         }
     }
 
@@ -617,6 +652,9 @@
         applyBannerSetting(!!readSetting(settings, 'hideVibeBanner'));
 
         if (!isWaveEnabled()) return;
+
+        // Плеер мог перерисоваться после смены маршрута — возвращаем оверлей.
+        ensureTimecodeOverlays();
 
         const playerWidth = readNumber(settings, 'playerWidth');
         const coverOffsetX = readNumber(settings, 'coverOffsetX');
@@ -782,7 +820,6 @@
 
             root.style.setProperty('--ps-wheel-width', overlayWidth + 'px');
             root.style.setProperty('--ps-wheel-max-width', '80vw');
-            root.style.setProperty('--ps-overlay-content-shift', contentShift + 'px');
 
             swiper.style.width = overlayWidth + 'px';
             swiper.style.maxWidth = '80vw';
@@ -820,7 +857,7 @@
         applyWidgetHeight();
     }
 
-    const globalObserver = new MutationObserver(() => {
+    const appTreeWatcher = new MutationObserver(() => {
         if (!isWaveActive()) return;
         const root = getRoot();
         if (!root) return;
@@ -834,12 +871,12 @@
         scheduleLayout();
     });
 
-    const coverObserver = new MutationObserver(() => {
+    const albumCoverWatcher = new MutationObserver(() => {
         if (!isWaveActive()) return;
         const cover = document.querySelector('[class*="AlbumCover_root"]');
         if (cover && currentSettings && Object.keys(currentSettings).length > 0) {
             applyAll(currentSettings);
-            coverObserver.disconnect();
+            albumCoverWatcher.disconnect();
         }
     });
 
@@ -900,10 +937,10 @@
         scheduleLayout();
     }
 
-    let swiperObserver = null;
+    let wheelTreeWatcher = null;
     function startSwiperObserver() {
-        if (swiperObserver) swiperObserver.disconnect();
-        swiperObserver = new MutationObserver(() => {
+        if (wheelTreeWatcher) wheelTreeWatcher.disconnect();
+        wheelTreeWatcher = new MutationObserver(() => {
             if (!isWaveActive()) return;
             const swiper = getWheelElement();
             if (!swiper) return;
@@ -917,11 +954,11 @@
                 scheduleLayout();
             }
         });
-        swiperObserver.observe(document.body, { childList: true, subtree: true });
+        wheelTreeWatcher.observe(document.body, { childList: true, subtree: true });
     }
 
     let lastUrl = location.href;
-    const urlObserver = new MutationObserver(() => {
+    const routeWatcher = new MutationObserver(() => {
         if (!isWaveActive()) return;
         const url = location.href;
         if (url === lastUrl) return;
@@ -951,8 +988,8 @@
         if (waveStarted) return;
         waveStarted = true;
 
-        globalObserver.observe(document.body, { childList: true, subtree: true });
-        coverObserver.observe(document.body, { childList: true, subtree: true });
+        appTreeWatcher.observe(document.body, { childList: true, subtree: true });
+        albumCoverWatcher.observe(document.body, { childList: true, subtree: true });
 
         if (!isFrozen) {
             moveAnimationToRoot();
@@ -980,7 +1017,7 @@
         setTimeout(() => { if (isWaveActive()) scheduleLayout(); }, 2500);
 
         startSwiperObserver();
-        urlObserver.observe(document, { subtree: true, childList: true });
+        routeWatcher.observe(document, { subtree: true, childList: true });
     }
 
     function freeze() {
@@ -1047,6 +1084,143 @@
         scheduleLayoutBurst();
     }
 
+    // ─────────────────────────────────────────────────────────────
+    // Таймкод на главной странице («Моя волна»)
+    // ─────────────────────────────────────────────────────────────
+    // Оверлей живёт внутри названия трека и наследует его шрифт.
+    // Слушатели делегированы документу, поэтому переживают перерисовку плеера.
+
+    const VIBE_TIMECODE_SLIDER = '[data-test-id="VIBE_PLAYERBAR_TIMECODE_SLIDER"]';
+    const VIBE_TRACK_NAME = '[data-test-id="VIBE_PLAYERBAR_TRACK_NAME"]';
+
+    let timecodeSlider = null;
+    let timecodeFrame = 0;
+
+    function formatTimecode(rawSeconds) {
+        const total = Math.max(0, Math.floor(Number(rawSeconds) || 0));
+        const hours = Math.floor(total / 3600);
+        const minutes = Math.floor((total % 3600) / 60);
+        const seconds = total % 60;
+        const pad = (value) => String(value).padStart(2, '0');
+        return hours > 0
+            ? hours + ':' + pad(minutes) + ':' + pad(seconds)
+            : pad(minutes) + ':' + pad(seconds);
+    }
+
+    function getTimecodeOverlay(trackName) {
+        let overlay = trackName.querySelector(':scope > .ps-timecode-overlay');
+        if (!overlay) {
+            overlay = document.createElement('span');
+            overlay.className = 'ps-timecode-overlay';
+            overlay.setAttribute('aria-hidden', 'true');
+            trackName.append(overlay);
+        }
+        return overlay;
+    }
+
+    // Заранее создаём оверлей, чтобы его появление анимировалось
+    // CSS-переходом, а не происходило скачком при первом наведении.
+    function ensureTimecodeOverlays() {
+        document
+            .querySelectorAll('[data-test-id="VIBE_PLAYERBAR"] ' + VIBE_TRACK_NAME)
+            .forEach((trackName) => getTimecodeOverlay(trackName));
+    }
+
+    // Показываем текущую позицию воспроизведения, а не точку под курсором.
+    function updateTimecodeOverlay(slider) {
+        if (!document.documentElement.classList.contains('ps-timecode-title')) return;
+
+        const trackName = slider.querySelector(VIBE_TRACK_NAME);
+        const input = slider.querySelector('input[type="range"]');
+        if (!trackName || !input) return;
+
+        const duration = Number(input.max);
+        const seconds = Number(input.value);
+        const total = Number.isFinite(duration) && duration > 0
+            ? duration
+            : (Number.isFinite(seconds) && seconds > 0 ? seconds : 0);
+
+        const text = formatTimecode(seconds) + ' / ' + formatTimecode(total);
+        const overlay = getTimecodeOverlay(trackName);
+        if (overlay.textContent !== text) overlay.textContent = text;
+    }
+
+    // Пока курсор над шкалой, позиция воспроизведения меняется —
+    // обновляем текст каждый кадр, пока наведение или фокус активны.
+    function tickTimecodeOverlay() {
+        timecodeFrame = 0;
+        // Плеер мог перерисоваться: отсоединённый слайдер больше не обновляем.
+        if (!timecodeSlider || !timecodeSlider.isConnected) {
+            stopTimecodeLoop();
+            return;
+        }
+        if (!document.documentElement.classList.contains('ps-timecode-title')) {
+            stopTimecodeLoop();
+            return;
+        }
+        updateTimecodeOverlay(timecodeSlider);
+        timecodeFrame = requestAnimationFrame(tickTimecodeOverlay);
+    }
+
+    function startTimecodeLoop(slider) {
+        timecodeSlider = slider;
+        if (!timecodeFrame) timecodeFrame = requestAnimationFrame(tickTimecodeOverlay);
+    }
+
+    function stopTimecodeLoop() {
+        timecodeSlider = null;
+        if (timecodeFrame) {
+            cancelAnimationFrame(timecodeFrame);
+            timecodeFrame = 0;
+        }
+    }
+
+    function stopTimecodeLoopIfIdle(slider) {
+        if (slider !== timecodeSlider) return;
+        if (slider.matches(':hover, :focus-within')) return;
+        stopTimecodeLoop();
+    }
+
+    function setupTimecodeDisplay() {
+        ensureTimecodeOverlays();
+
+        const handlePointer = (event) => {
+            if (!(event.target instanceof Element)) return;
+            const slider = event.target.closest(VIBE_TIMECODE_SLIDER);
+            if (!slider) return;
+            updateTimecodeOverlay(slider);
+            startTimecodeLoop(slider);
+        };
+
+        document.addEventListener('pointerover', handlePointer, true);
+        document.addEventListener('pointermove', handlePointer, true);
+
+        document.addEventListener('pointerout', (event) => {
+            if (!(event.target instanceof Element)) return;
+            const slider = event.target.closest(VIBE_TIMECODE_SLIDER);
+            if (!slider) return;
+            const next = event.relatedTarget;
+            if (next instanceof Node && slider.contains(next)) return;
+            // Даём браузеру обновить :hover, затем останавливаем цикл.
+            requestAnimationFrame(() => stopTimecodeLoopIfIdle(slider));
+        }, true);
+
+        document.addEventListener('focusin', (event) => {
+            if (!(event.target instanceof Element)) return;
+            const slider = event.target.closest(VIBE_TIMECODE_SLIDER);
+            if (!slider) return;
+            updateTimecodeOverlay(slider);
+            startTimecodeLoop(slider);
+        }, true);
+
+        document.addEventListener('focusout', (event) => {
+            if (!(event.target instanceof Element)) return;
+            const slider = event.target.closest(VIBE_TIMECODE_SLIDER);
+            if (!slider) return;
+            requestAnimationFrame(() => stopTimecodeLoopIfIdle(slider));
+        }, true);
+    }
+
     function initSettings() {
         if (!window.pulsesyncApi) {
             if (Date.now() - initStartedAt > 10000) {
@@ -1106,11 +1280,12 @@
     }
 
     function boot() {
-        addLiquidGlass();
+        mountDistortionFilter();
 
         // Тема применяется сразу, чтобы не было вспышки стандартных стилей.
         applyThemeSettings(currentSettings);
-        initFullscreenAnimations();
+        setupPlayerMotion();
+        setupTimecodeDisplay();
         waitForPlayer(initSettings);
     }
 
